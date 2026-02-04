@@ -816,3 +816,215 @@ header {
     box-shadow: 0 8px 25px rgba(0, 0, 0, 0.25);
     background-color: #3e4d25;
 }
+
+/* Responsive Design */
+@media (max-width: 1024px) {
+    .onboarding-container {
+        padding: 40px;
+    }
+
+    .content-left h1 {
+        font-size: 60px;
+    }
+
+    .content-left .sub-header {
+        font-size: 40px;
+    }
+
+    .login-page {
+        padding-right: 5vh;
+    }
+}
+
+@media (max-width: 768px) {
+
+    /* Onboarding Screen */
+    .onboarding-container {
+        flex-direction: column;
+        height: auto;
+        min-height: 100vh;
+        padding: 100px 30px 40px 30px;
+        overflow: auto;
+    }
+
+    header {
+        top: 20px;
+        left: 30px;
+    }
+
+    .content-left {
+        padding-left: 0;
+        max-width: 100%;
+        text-align: center;
+        align-items: center;
+        flex: none;
+    }
+
+    .content-left h1 {
+        font-size: 42px;
+        white-space: normal;
+        margin-bottom: 20px;
+    }
+
+    .content-left .sub-header {
+        font-size: 28px;
+        margin-bottom: 20px;
+    }
+
+    .content-left .sub-header br {
+        display: none;
+    }
+
+    .content-left p {
+        font-size: 18px;
+        margin-bottom: 40px;
+    }
+
+    .right-section {
+        position: relative;
+        width: 100%;
+        height: 250px;
+        margin-top: 40px;
+        pointer-events: auto;
+    }
+
+    .hero-image {
+        object-position: center;
+        border-radius: 20px;
+    }
+
+    /* Login & Signup */
+    .login-page {
+        justify-content: center;
+        padding: 40px 20px;
+        height: auto;
+        min-height: 100vh;
+    }
+
+    .login-card {
+        width: 100%;
+        max-width: 450px;
+        margin-right: 0;
+        padding: 40px 25px;
+    }
+
+    .login-card h1 {
+        font-size: 36px;
+        margin-bottom: 30px;
+    }
+
+    .form-group label {
+        font-size: 18px;
+        margin-top: 15px;
+    }
+
+    .form-group input {
+        padding: 12px 20px;
+        font-size: 16px;
+    }
+
+    .login-submit-btn {
+        font-size: 20px;
+        padding: 12px 40px;
+        margin: 30px auto 20px auto;
+    }
+
+    .signup-prompt {
+        font-size: 16px;
+    }
+
+    /* Header & Navigation */
+    .home-header {
+        padding: 0 15px;
+        height: auto;
+        flex-direction: column;
+    }
+
+    .home-nav {
+        flex-wrap: wrap;
+        justify-content: center;
+        width: 100%;
+    }
+
+    .nav-item {
+        padding: 10px 15px;
+        font-size: 14px;
+        height: 50px;
+    }
+
+    /* Main Sections */
+    .home-main {
+        padding: 20px 15px;
+    }
+
+    .hero-section {
+        padding: 40px 20px;
+    }
+
+    .hero-title {
+        font-size: 32px !important;
+    }
+
+    .hero-subtitle {
+        font-size: 18px !important;
+    }
+
+    .search-container {
+        width: 100%;
+    }
+
+    .book-cover-placeholder {
+        height: 220px;
+        margin-bottom: 15px;
+    }
+
+    .view-btn {
+        padding: 8px 30px;
+        font-size: 16px;
+    }
+
+    .book-grid {
+        grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+        gap: 15px;
+    }
+
+    .book-card-home {
+        padding: 10px;
+    }
+
+    .book-info h3 {
+        font-size: 18px;
+    }
+
+    .book-info p {
+        font-size: 14px;
+    }
+
+    /* Footer */
+    .footer-container {
+        grid-template-columns: 1fr;
+        text-align: center;
+        gap: 30px;
+    }
+
+    .home-footer {
+        padding: 40px 20px;
+    }
+
+    /* Admin Page */
+    .admin-container {
+        padding: 40px 15px;
+    }
+
+    .admin-card {
+        padding: 30px 20px;
+    }
+
+    .form-grid {
+        grid-template-columns: 1fr;
+    }
+
+    .form-group.full-width {
+        grid-column: span 1;
+    }
+}

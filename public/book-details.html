@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online E-Library | Book Details</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="details-page">
+    <header class="home-header">
+        <img src="./assets/logo.png.png" alt="E-Library Logo" class="logo">
+        <nav class="home-nav">
+            <a href="./home.html" class="nav-item">Home</a>
+            <a href="./categories.html" class="nav-item">Categories</a>
+            <a href="./saved.html" class="nav-item">Saved</a>
+            <a href="#" class="nav-item" onclick="logout()">Logout</a>
+        </nav>
+    </header>
+
+    <main class="details-container">
+        <section class="details-card">
+            <h1 id="book-title-header">Book Details</h1>
+
+            <div class="details-content">
+                <div class="book-visual">
+                    <div class="book-cover-large" id="book-cover-large">
+                        <div class="cover-text">Loading...</div>
+                    </div>
+                    <div class="action-buttons">
+                        <button class="action-btn download-btn" id="download-btn">Download PDF</button>
+                        <button class="action-btn read-btn" id="read-btn">Read Online</button>
+                    </div>
+                </div>
+
+                <div class="book-metadata">
+                    <span class="category-pill-details" id="book-category">...</span>
+                    <p id="book-description"
+                        style="margin-top: 30px; font-size: 20px; color: #4b5032; line-height: 1.5;"></p>
+                </div>
+            </div>
+        </section>
+    </main>
+
+    <script src="./js/supabase-config.js"></script>
+    <script src="./js/auth.js"></script>
+    <script>
+        const urlParams = new URLSearchParams(window.location.search);
+        const bookId = urlParams.get('id');
+
+        async function loadBookDetails() {
+            if (!bookId) {
+                alert('No book selected');
+                window.location.href = './home.html';
+                return;
+            }
+
+            try {
+                const { data: book, error } = await supabase
+                    .from('books')
+                    .select('*')
+                    .eq('id', bookId)
+                    .single();
+
+                if (error) throw error;
+
+                document.getElementById('book-title-header').innerText = book.title;
+                document.getElementById('book-category').innerText = book.category;
+                document.getElementById('book-description').innerText = book.description;
+                document.getElementById('book-cover-large').innerHTML = `<img src="${book.cover_url}" alt="${book.title}" style="width: 100%; height: 100%; object-fit: cover;">`;
+
+                document.getElementById('download-btn').onclick = () => downloadPDF(book.pdf_url, book.title);
+                document.getElementById('read-btn').onclick = () => readOnline(book.pdf_url);
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('Error loading book details.');
+            }
+        }
+
+        async function downloadPDF(url, title) {
+            try {
+                const btn = document.getElementById('download-btn');
+                const originalText = btn.textContent;
+                btn.textContent = 'Preparing Download...';
+                btn.disabled = true;
+
+                const response = await fetch(url);
+                const blob = await response.blob();
+                const blobUrl = window.URL.createObjectURL(blob);
+
+                const link = document.createElement('a');
+                link.href = blobUrl;
+                link.download = `${title.replace(/\s+/g, '_')}.pdf`;
+                document.body.appendChild(link);
+                link.click();
+
+                document.body.removeChild(link);
+                window.URL.revokeObjectURL(blobUrl);
+
+                btn.textContent = originalText;
+                btn.disabled = false;
+            } catch (error) {
+                console.error('Download error:', error);
+                alert('Failed to download the PDF. Please try again.');
+                const btn = document.getElementById('download-btn');
+                btn.textContent = 'Download PDF';
+                btn.disabled = false;
+            }
+        }
+
+        function readOnline(url) {
+            window.open(url, '_blank');
+        }
+
+        window.onload = async () => {
+            const user = await checkUser();
+            if (!user) {
+                window.location.href = './login.html';
+            } else {
+                loadBookDetails();
+            }
+        };
+    </script>
+
+    <footer class="home-footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>Contact Admin:</h3>
+                <p>admin@gmail.com</p>
+            </div>
+            <div class="footer-section">
+                <h3>About:</h3>
+                <p>This platform allows users to explore and read free e-books online. Built for learning and
+                    educational purposes.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links:</h3>
+                <ul>
+                    <li><a href="./home.html">Home</a></li>
+                    <li><a href="./categories.html">Categories</a></li>
+                    <li><a href="./saved.html">Saved Books</a></li>
+                    <li><a href="#" onclick="logout()">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+</body>
+
+</html>

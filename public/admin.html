@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online E-Library | Admin Panel</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="admin-page">
+    <header class="home-header">
+        <img src="./assets/logo.png.png" alt="E-Library Logo" class="logo">
+        <nav class="home-nav">
+            <a href="#" class="nav-item active">Admin Panel</a>
+            <a href="./login.html" class="nav-item">Logout</a>
+        </nav>
+    </header>
+
+    <main class="admin-container">
+        <div class="admin-card">
+            <h1>Hello Admin</h1>
+
+            <form id="upload-book-form">
+                <div class="form-grid">
+                    <div class="form-group">
+                        <label>Book Title</label>
+                        <input type="text" id="book-title" placeholder="Enter book title" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Author</label>
+                        <input type="text" id="book-author" placeholder="Enter author name" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Category</label>
+                        <select id="book-category" required>
+                            <option value="">Select Category</option>
+                            <option value="Fiction">Fiction</option>
+                            <option value="Mystery">Mystery</option>
+                            <option value="Novel">Novel</option>
+                            <option value="Programming">Programming</option>
+                            <option value="Kids">Kids</option>
+                        </select>
+                    </div>
+                    <div class="form-group full-width">
+                        <label>Description</label>
+                        <textarea id="book-description" placeholder="Enter book description" rows="4"
+                            required></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Upload Book PDF</label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="book-pdf" accept=".pdf" required>
+                            <span class="file-custom">Choose File</span>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Upload Cover Photo</label>
+                        <div class="file-input-wrapper">
+                            <input type="file" id="book-cover" accept="image/*" required>
+                            <span class="file-custom">Choose Photo</span>
+                        </div>
+                    </div>
+                </div>
+
+                <button type="submit" class="admin-submit-btn" id="upload-btn">Upload Book</button>
+            </form>
+        </div>
+    </main>
+
+    <footer class="home-footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>Contact Admin:</h3>
+                <p>admin07@gmail.com</p>
+            </div>
+            <div class="footer-section">
+                <h3>About:</h3>
+                <p>Admin panel for managing e-library contents.</p>
+            </div>
+        </div>
+    </footer>
+
+    <script src="./js/supabase-config.js"></script>
+    <script src="./js/auth.js"></script>
+    <script>
+        // Security check for Admin page
+        window.onload = async () => {
+            console.log('Admin panel security check...');
+            const user = await checkUser();
+            if (!user) {
+                console.log('No user found, redirecting to login...');
+                window.location.href = './login.html';
+                return;
+            }
+
+            const role = await getUserRole(user.id);
+            console.log('Current user role:', role);
+            if (role !== 'admin') {
+                alert('Access Denied: You do not have admin privileges.');
+                window.location.href = './home.html';
+            }
+        };
+    </script>
+    <script src="./js/admin.js"></script>
+</body>
+
+</html>

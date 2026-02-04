@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online E-Library | Login</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="login-page">
+    <header>
+        <img src="./assets/logo.png.png" alt="E-Library Logo" class="logo">
+    </header>
+
+    <main class="login-container">
+        <div class="login-card">
+            <div class="noise-overlay"></div>
+            <h1>Login</h1>
+            <form id="loginForm" autocomplete="off">
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" placeholder="email@example.com" required autocomplete="off">
+                </div>
+                <div class="form-group">
+                    <label for="password">Password</label>
+                    <input type="password" id="password" placeholder="••••••••" required autocomplete="new-password">
+                </div>
+                <button type="submit" class="login-submit-btn" id="login-btn">Login</button>
+            </form>
+            <p class="signup-prompt">Don’t have an account? <i onclick="window.location.href='./signup.html'">Signup</i>
+            </p>
+        </div>
+    </main>
+
+    <script src="./js/supabase-config.js"></script>
+    <script src="./js/auth.js"></script>
+    <script>
+        document.getElementById('loginForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+            const btn = document.getElementById('login-btn');
+
+            btn.disabled = true;
+            btn.textContent = 'Logging in...';
+
+            try {
+                const data = await login(email, password);
+                if (data.user) {
+                    console.log('Login successful for user ID:', data.user.id);
+                    const role = await getUserRole(data.user.id);
+                    console.log('Determined role:', role);
+
+                    if (role === 'admin') {
+                        console.log('Redirecting to Admin Panel...');
+                        window.location.href = './admin.html';
+                    } else {
+                        console.log('Redirecting to Home page...');
+                        window.location.href = './home.html';
+                    }
+                }
+            } catch (error) {
+                alert('Login failed: ' + error.message);
+            } finally {
+                btn.disabled = false;
+                btn.textContent = 'Login';
+            }
+        });
+    </script>
+</body>
+
+</html>

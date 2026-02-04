@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online E-Library | Home</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="home-page">
+    <header class="home-header">
+        <img src="./assets/logo.png.png" alt="E-Library Logo" class="logo">
+        <nav class="home-nav">
+            <a href="./home.html" class="nav-item active">Home</a>
+            <a href="./categories.html" class="nav-item">Categories</a>
+            <a href="./saved.html" class="nav-item">Saved</a>
+            <a href="#" class="nav-item" onclick="logout()">Logout</a>
+        </nav>
+    </header>
+
+    <main class="home-main">
+        <section class="hero-section">
+            <div class="noise-overlay"></div>
+            <h1 class="hero-title">Read. Learn. Download.</h1>
+            <p class="hero-subtitle">Explore digital books anytime</p>
+
+            <div class="search-container">
+                <input type="text" placeholder="Search for books.." class="search-bar-home" id="search-input">
+                <button class="search-btn" id="search-btn">
+                    <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"
+                        stroke-linecap="round" stroke-linejoin="round">
+                        <circle cx="11" cy="11" r="8"></circle>
+                        <line x1="21" y1="21" x2="16.65" y2="16.65"></line>
+                    </svg>
+                </button>
+            </div>
+        </section>
+
+        <section class="category-section">
+            <h2 class="launched-title">—— New Launched Books ——</h2>
+            <div class="book-grid" id="book-grid">
+                <!-- Books will be loaded here -->
+                <p style="text-align: center; grid-column: 1/-1;">Loading books...</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="home-footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>Contact Admin:</h3>
+                <p>admin@gmail.com</p>
+            </div>
+            <div class="footer-section">
+                <h3>About:</h3>
+                <p>This platform allows users to explore and read free e-books online. Built for learning and
+                    educational purposes.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links:</h3>
+                <ul>
+                    <li><a href="./home.html">Home</a></li>
+                    <li><a href="./categories.html">Categories</a></li>
+                    <li><a href="./saved.html">Saved Books</a></li>
+                    <li><a href="#" onclick="logout()">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script src="./js/supabase-config.js"></script>
+    <script src="./js/auth.js"></script>
+    <script>
+        async function loadBooks(searchQuery = '') {
+            const grid = document.getElementById('book-grid');
+            const titleElement = document.querySelector('.launched-title');
+
+            try {
+                let query = supabase.from('books').select('*');
+
+                if (searchQuery) {
+                    query = query.or(`title.ilike.%${searchQuery}%,author.ilike.%${searchQuery}%`);
+                    titleElement.innerText = `—— Results for "${searchQuery}" ——`;
+                } else {
+                    titleElement.innerText = "—— New Launched Books ——";
+                    // Only show the last 5 books uploaded recently
+                    query = query.order('created_at', { ascending: false }).limit(5);
+                }
+
+                const { data: books, error } = await query;
+
+                if (error) throw error;
+
+                grid.innerHTML = '';
+                if (books.length === 0) {
+                    grid.innerHTML = '<p style="text-align: center; grid-column: 1/-1; font-size: 24px; color: #4b5032; margin-top: 40px;">No books found matching your search.</p>';
+                    return;
+                }
+
+                books.forEach(book => {
+                    const card = document.createElement('div');
+                    card.className = 'book-card-home';
+                    card.innerHTML = `
+                        <img src="./assets/bookmark 1.png" alt="Bookmark" class="bookmark-icon"
+                            onclick="saveBook({id: '${book.id}', title: '${book.title.replace(/'/g, "\\'")}', author: '${book.author.replace(/'/g, "\\'")}', cover_url: '${book.cover_url}'})">
+                        <div class="book-cover-placeholder" style="background-image: url('${book.cover_url}'); background-size: cover; background-position: center;"></div>
+                        <div class="book-info">
+                            <h3>${book.title}</h3>
+                            <p>${book.author}</p>
+                            <button class="view-btn" onclick="viewBook('${book.id}')">View</button>
+                        </div>
+                    `;
+                    grid.appendChild(card);
+                });
+            } catch (error) {
+                console.error('Error loading books:', error);
+                grid.innerHTML = '<p style="text-align: center; grid-column: 1/-1;">Error loading books.</p>';
+            }
+        }
+
+        // Search logic
+        document.getElementById('search-btn').addEventListener('click', () => {
+            const query = document.getElementById('search-input').value.trim();
+            loadBooks(query);
+        });
+
+        document.getElementById('search-input').addEventListener('keypress', (e) => {
+            if (e.key === 'Enter') {
+                const query = document.getElementById('search-input').value.trim();
+                loadBooks(query);
+            }
+        });
+
+        function viewBook(id) {
+            window.location.href = `./book-details.html?id=${id}`;
+        }
+
+        async function saveBook(bookData) {
+            const user = await checkUser();
+            if (!user) {
+                alert('Please login to save books.');
+                return;
+            }
+
+            const storageKey = `savedBooks_${user.id}`;
+            let savedBooks = JSON.parse(localStorage.getItem(storageKey)) || [];
+
+            if (!savedBooks.some(b => b.title === bookData.title)) {
+                savedBooks.push(bookData);
+                localStorage.setItem(storageKey, JSON.stringify(savedBooks));
+                alert(bookData.title + ' saved to your library!');
+            } else {
+                alert('This book is already in your saved list.');
+            }
+        }
+
+        // Initialize user check and books
+        window.onload = async () => {
+            console.log('Home page check...');
+            const user = await checkUser();
+            if (!user) {
+                window.location.href = './login.html';
+            } else {
+                const role = await getUserRole(user.id);
+                console.log('User role on home page:', role);
+                if (role === 'admin') {
+                    // Admins should probably see the admin panel by default
+                    // or at least have the link. But let's stay on home if they came here.
+                }
+                loadBooks();
+            }
+        };
+    </script>
+</body>
+
+</html>

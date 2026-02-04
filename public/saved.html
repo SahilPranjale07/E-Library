@@ -1,0 +1,113 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online E-Library | Saved Books</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="saved-page">
+    <header class="home-header">
+        <img src="./assets/logo.png.png" alt="E-Library Logo" class="logo">
+        <nav class="home-nav">
+            <a href="./home.html" class="nav-item">Home</a>
+            <a href="./categories.html" class="nav-item">Categories</a>
+            <a href="./saved.html" class="nav-item active">Saved</a>
+            <a href="#" class="nav-item" onclick="logout()">Logout</a>
+        </nav>
+    </header>
+
+    <section class="browse-header">
+        <h1>Saved Books</h1>
+    </section>
+
+    <main class="home-main">
+        <div class="book-grid" id="saved-book-grid">
+            <!-- Saved books will be injected here -->
+        </div>
+    </main>
+
+    <footer class="home-footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>Contact Admin:</h3>
+                <p>admin07@gmail.com</p>
+            </div>
+            <div class="footer-section">
+                <h3>About:</h3>
+                <p>This platform allows users to explore and read free e-books online. Built for learning and
+                    educational purposes.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links:</h3>
+                <ul>
+                    <li><a href="./home.html">Home</a></li>
+                    <li><a href="./categories.html">Categories</a></li>
+                    <li><a href="./saved.html">Saved Books</a></li>
+                    <li><a href="#" onclick="logout()">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script src="./js/supabase-config.js"></script>
+    <script src="./js/auth.js"></script>
+    <script>
+        let currentUser = null;
+
+        async function displaySavedBooks() {
+            const bookGrid = document.getElementById('saved-book-grid');
+
+            // Get current user
+            currentUser = await checkUser();
+            if (!currentUser) {
+                window.location.href = './login.html';
+                return;
+            }
+
+            const storageKey = `savedBooks_${currentUser.id}`;
+            const savedBooks = JSON.parse(localStorage.getItem(storageKey)) || [];
+
+            bookGrid.innerHTML = '';
+
+            if (savedBooks.length === 0) {
+                bookGrid.innerHTML = '<p style="font-size: 24px; color: #4b5032; text-align: center; grid-column: 1/-1;">No books saved yet.</p>';
+                return;
+            }
+
+            savedBooks.forEach((book, index) => {
+                const card = document.createElement('div');
+                card.className = 'book-card-home';
+                card.innerHTML = `
+                    <img src="./assets/bookmark 1.png" alt="Bookmark" class="bookmark-icon" onclick="removeBook(${index})" style="cursor: pointer; filter: saturate(2);">
+                    <div class="book-cover-placeholder" style="background-image: url('${book.cover_url || ''}'); background-size: cover; background-position: center;">
+                        ${!book.cover_url ? '<div style="padding: 20px; text-align: center; color: #4b5032;">No Cover</div>' : ''}
+                    </div>
+                    <div class="book-info">
+                        <h3>${book.title}</h3>
+                        <p>${book.author}</p>
+                        <button class="view-btn" onclick="window.location.href='./book-details.html?id=${book.id || ''}'">View</button>
+                    </div>
+                `;
+                bookGrid.appendChild(card);
+            });
+        }
+
+        async function removeBook(index) {
+            if (!currentUser) return;
+            const storageKey = `savedBooks_${currentUser.id}`;
+            let savedBooks = JSON.parse(localStorage.getItem(storageKey)) || [];
+            savedBooks.splice(index, 1);
+            localStorage.setItem(storageKey, JSON.stringify(savedBooks));
+            displaySavedBooks();
+        }
+
+        // Initialize display
+        window.onload = displaySavedBooks;
+    </script>
+</body>
+
+</html>

@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Online E-Library | Categories</title>
+    <link rel="stylesheet" href="./css/style.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+</head>
+
+<body class="categories-page">
+    <header class="home-header">
+        <img src="./assets/logo.png.png" alt="E-Library Logo" class="logo">
+        <nav class="home-nav">
+            <a href="./home.html" class="nav-item">Home</a>
+            <a href="./categories.html" class="nav-item active">Categories</a>
+            <a href="./saved.html" class="nav-item">Saved</a>
+            <a href="#" class="nav-item" onclick="logout()">Logout</a>
+        </nav>
+    </header>
+
+    <section class="browse-header">
+        <h1>Browse by Categories</h1>
+    </section>
+
+    <main class="categories-container">
+        <aside class="categories-sidebar">
+            <ul class="sidebar-list">
+                <li class="active">All</li>
+                <li>Fiction</li>
+                <li>Mystery</li>
+                <li>Novel</li>
+                <li>Programming</li>
+                <li>Kids</li>
+            </ul>
+        </aside>
+
+        <section class="categories-main-content">
+            <div class="category-pills">
+                <button class="pill" data-category="Fiction">Fiction</button>
+                <button class="pill" data-category="Mystery">Mystery</button>
+                <button class="pill" data-category="Novel">Novel</button>
+                <button class="pill" data-category="Programming">Programming</button>
+                <button class="pill" data-category="Kids">Kids</button>
+            </div>
+
+            <div class="book-grid category-grid" id="category-book-grid">
+                <!-- Books will be injected here by JS -->
+                <p style="text-align: center; grid-column: 1/-1;">Loading books...</p>
+            </div>
+        </section>
+    </main>
+
+    <footer class="home-footer">
+        <div class="footer-container">
+            <div class="footer-section">
+                <h3>Contact Admin:</h3>
+                <p>admin@gmail.com</p>
+            </div>
+            <div class="footer-section">
+                <h3>About:</h3>
+                <p>This platform allows users to explore and read free e-books online. Built for learning and
+                    educational purposes.</p>
+            </div>
+            <div class="footer-section">
+                <h3>Quick Links:</h3>
+                <ul>
+                    <li><a href="./home.html">Home</a></li>
+                    <li><a href="./categories.html">Categories</a></li>
+                    <li><a href="./saved.html">Saved Books</a></li>
+                    <li><a href="#" onclick="logout()">Logout</a></li>
+                </ul>
+            </div>
+        </div>
+    </footer>
+
+    <script src="./js/supabase-config.js"></script>
+    <script src="./js/auth.js"></script>
+    <script>
+        const sidebarItems = document.querySelectorAll('.sidebar-list li');
+        const pills = document.querySelectorAll('.pill');
+        const bookGrid = document.getElementById('category-book-grid');
+        let allBooks = [];
+
+        async function fetchAllBooks() {
+            try {
+                const { data, error } = await supabase.from('books').select('*');
+                if (error) throw error;
+                allBooks = data;
+                updateSelection('All');
+            } catch (error) {
+                console.error('Error fetching books:', error);
+                bookGrid.innerHTML = '<p style="text-align: center; grid-column: 1/-1;">Error loading books.</p>';
+            }
+        }
+
+        function updateSelection(category) {
+            // Update Sidebar
+            sidebarItems.forEach(item => {
+                if (item.textContent === category) item.classList.add('active');
+                else item.classList.remove('active');
+            });
+
+            // Update Pills
+            pills.forEach(pill => {
+                if (pill.dataset.category === category) pill.classList.add('active');
+                else pill.classList.remove('active');
+            });
+
+            // Filter and Display Books
+            displayBooks(category);
+        }
+
+        function displayBooks(category) {
+            bookGrid.innerHTML = '';
+            const filteredBooks = category === 'All'
+                ? allBooks
+                : allBooks.filter(book => book.category === category);
+
+            if (filteredBooks.length === 0) {
+                bookGrid.innerHTML = '<p style="text-align: center; grid-column: 1/-1;">No books found in this category.</p>';
+                return;
+            }
+
+            filteredBooks.forEach(book => {
+                const card = document.createElement('div');
+                card.className = 'book-card-home';
+                card.innerHTML = `
+                    <img src="./assets/bookmark 1.png" alt="Bookmark" class="bookmark-icon" onclick="saveBook({id: '${book.id}', title: '${book.title.replace(/'/g, "\\'")}', author: '${book.author.replace(/'/g, "\\'")}', cover_url: '${book.cover_url}'})" style="cursor: pointer;">
+                    <div class="book-cover-placeholder" style="background-image: url('${book.cover_url}'); background-size: cover; background-position: center;"></div>
+                    <div class="book-info">
+                        <h3>${book.title}</h3>
+                        <p>${book.author}</p>
+                        <button class="view-btn" onclick="viewBook('${book.id}')">View</button>
+                    </div>
+                `;
+                bookGrid.appendChild(card);
+            });
+        }
+
+        function viewBook(id) {
+            window.location.href = `./book-details.html?id=${id}`;
+        }
+
+        async function saveBook(bookData) {
+            const user = await checkUser();
+            if (!user) {
+                alert('Please login to save books.');
+                return;
+            }
+
+            const storageKey = `savedBooks_${user.id}`;
+            let savedBooks = JSON.parse(localStorage.getItem(storageKey)) || [];
+
+            if (!savedBooks.some(b => b.title === bookData.title)) {
+                savedBooks.push(bookData);
+                localStorage.setItem(storageKey, JSON.stringify(savedBooks));
+                alert(bookData.title + ' saved to your library!');
+            } else {
+                alert('This book is already in your saved list.');
+            }
+        }
+
+        // Event Listeners
+        sidebarItems.forEach(item => {
+            item.addEventListener('click', () => updateSelection(item.textContent));
+        });
+
+        pills.forEach(pill => {
+            pill.addEventListener('click', () => updateSelection(pill.dataset.category));
+        });
+
+        // Initialize
+        window.onload = async () => {
+            const user = await checkUser();
+            if (!user) {
+                window.location.href = './login.html';
+            } else {
+                fetchAllBooks();
+            }
+        };
+    </script>
+</body>
+
+</html>

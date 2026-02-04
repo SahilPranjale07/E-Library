@@ -26,14 +26,16 @@ body {
     height: 100vh;
     width: 100vw;
     position: relative;
-    padding: 4vw 8vw;
+    padding: 0;
+    /* Removed 4vw 8vw padding */
     overflow: hidden;
+    background-color: var(--page-bg);
 }
 
 header {
     position: absolute;
-    top: 4vw;
-    left: 8vw;
+    top: 40px;
+    left: 60px;
     z-index: 10;
 }
 
@@ -66,8 +68,9 @@ header {
     flex-direction: column;
     justify-content: center;
     z-index: 2;
-    max-width: 700px;
-    padding-left: 5vw;
+    max-width: 800px;
+    padding-left: 100px;
+    /* Added fixed padding back since container padding is gone */
 }
 
 .content-left h1 {
@@ -119,8 +122,8 @@ header {
     position: absolute;
     right: 0;
     top: 0;
-    width: 70%;
-    /* Wider to let the image overlap more to the left */
+    width: 75%;
+    /* Increased width so the frame isn't squished */
     height: 100vh;
     z-index: 1;
     pointer-events: none;
@@ -130,9 +133,8 @@ header {
     height: 100%;
     width: 100%;
     object-fit: cover;
-    /* Ensures the bookshelf hits the top and bottom */
-    object-position: 5% center;
-    /* Shift the 'books' part to the left */
+    object-position: 25% center;
+    /* Shift the books within the frame slightly */
 }
 
 /* Login/Signup Styles */
